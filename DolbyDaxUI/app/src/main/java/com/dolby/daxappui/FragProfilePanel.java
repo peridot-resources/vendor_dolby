@@ -56,6 +56,7 @@ public class FragProfilePanel extends Fragment implements View.OnClickListener, 
     private boolean mdeState = false;
     private boolean mvlState = false;
     private boolean msvState = false;
+    private boolean mApplyingSwitchState = false;
 
     @Override // android.widget.SeekBar.OnSeekBarChangeListener
     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -150,8 +151,8 @@ public class FragProfilePanel extends Fragment implements View.OnClickListener, 
             this.mIeqName[2] = context.getString(R.string.warm);
             this.mIeqName[3] = context.getString(R.string.no_effect);
             this.mContext = context;
-            if (this.mvlSwitch != null) this.mvlSwitch.setChecked(this.mvlState);
-            if (this.msvSwitch != null) this.msvSwitch.setChecked(this.msvState);
+            if (this.mvlSwitch != null) setSwitchProgrammatically(this.mvlSwitch, this.mvlState);
+            if (this.msvSwitch != null) setSwitchProgrammatically(this.msvSwitch, this.msvState);
             SharedPreferences sharedPreferences = this.mContext.getSharedPreferences("dax_dea_default", 0);
             SharedPreferences.Editor edit = sharedPreferences.edit();
             if (sharedPreferences.getBoolean("firstrun", true)) {
@@ -338,19 +339,19 @@ public class FragProfilePanel extends Fragment implements View.OnClickListener, 
         this.mvlSwitch = (Switch) inflate.findViewById(R.id.vlButton);
         if (this.mvlSwitch != null) {
             this.mvlSwitch.setOnCheckedChangeListener(this);
-            this.mvlSwitch.setChecked(this.mvlState);
+            setSwitchProgrammatically(this.mvlSwitch, this.mvlState);
         }
         this.msvSwitch = (Switch) inflate.findViewById(R.id.svButton);
         Switch r2 = this.msvSwitch; // Smali: msvSwitch is android.widget.Switch.
         if (r2 != null) {
             r2.setOnCheckedChangeListener(this);
-            r2.setChecked(this.msvState);
+            setSwitchProgrammatically(r2, this.msvState);
             r2.measure(View.MeasureSpec.makeMeasureSpec(0, 0), View.MeasureSpec.makeMeasureSpec(0, 0));
         }
         this.mdeSwitch = (Switch) inflate.findViewById(R.id.deButtonSwitch);
         if (this.mdeSwitch != null) {
             this.mdeSwitch.setOnCheckedChangeListener(this);
-            this.mdeSwitch.setChecked(this.mdeState);
+            setSwitchProgrammatically(this.mdeSwitch, this.mdeState);
         }
         updateSpatialAudioAvailability(inflate);
         return inflate;
@@ -600,20 +601,29 @@ public class FragProfilePanel extends Fragment implements View.OnClickListener, 
             if (this.mFObserver != null) {
                 this.mvlState = DsClientSettings.INSTANCE.getVolumeLevelerOn(this.mFObserver);
                 if (this.mvlSwitch != null) {
-                    this.mvlSwitch.setChecked(this.mvlState);
+                    setSwitchProgrammatically(this.mvlSwitch, this.mvlState);
                     this.mvlSwitch.invalidate();
                 }
                 this.msvState = DsClientSettings.INSTANCE.getSpeakerVirtualizerOn(this.mFObserver);
                 if (this.msvSwitch != null) {
-                    this.msvSwitch.setChecked(this.msvState);
+                    setSwitchProgrammatically(this.msvSwitch, this.msvState);
                     this.msvSwitch.invalidate();
                 }
                 if (this.mdeSwitch != null) {
-                    this.mdeSwitch.setChecked(this.mdeState);
+                    setSwitchProgrammatically(this.mdeSwitch, this.mdeState);
                     this.mdeSwitch.invalidate();
                 }
             }
             setGeqViewEnabled();
+        }
+    }
+
+    private void setSwitchProgrammatically(Switch target, boolean state) {
+        this.mApplyingSwitchState = true;
+        try {
+            target.setChecked(state);
+        } finally {
+            this.mApplyingSwitchState = false;
         }
     }
 
@@ -631,7 +641,7 @@ public class FragProfilePanel extends Fragment implements View.OnClickListener, 
         boolean changed = false;
         try {
             if (id == R.id.deButtonSwitch) {
-                if (z != dsClientSettings.getDialogEnhancerOn(this.mFObserver)) {
+                if (!this.mApplyingSwitchState && z != dsClientSettings.getDialogEnhancerOn(this.mFObserver)) {
                     dsClientSettings.setDialogEnhancerOn(this.mFObserver, z);
                     changed = true;
                 }
@@ -650,12 +660,12 @@ public class FragProfilePanel extends Fragment implements View.OnClickListener, 
                     }
                 }
             } else if (id == R.id.vlButton) {
-                if (z != dsClientSettings.getVolumeLevelerOn(this.mFObserver)) {
+                if (!this.mApplyingSwitchState && z != dsClientSettings.getVolumeLevelerOn(this.mFObserver)) {
                     dsClientSettings.setVolumeLevelerOn(this.mFObserver, z);
                     changed = true;
                 }
             } else if (id == R.id.svButton) {
-                if (z != dsClientSettings.getSpeakerVirtualizerOn(this.mFObserver)) {
+                if (!this.mApplyingSwitchState && z != dsClientSettings.getSpeakerVirtualizerOn(this.mFObserver)) {
                     dsClientSettings.setSpeakerVirtualizerOn(this.mFObserver, z);
                     changed = true;
                 }

@@ -221,7 +221,6 @@ public final class DaxService extends Service {
             sendUpdate(update.event, update.value);
         } catch (RuntimeException e) {
             Log.w(TAG, "Cannot process Dolby parameter update", e);
-            reconnect();
         }
     }
 

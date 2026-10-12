@@ -29,7 +29,7 @@ public class DAXApplication extends Application {
     public void onCreate() {
         super.onCreate();
         com.dolby.daxservice.DaxServiceStarter.start(this);
-        if (Application.getProcessName().endsWith(":daxservice")) return;
+        if (Application.getProcessName().equals(getPackageName())) return;
         android.os.UserManager users = getSystemService(android.os.UserManager.class);
         if (users != null && !users.isUserUnlocked()) return;
         applyAppearanceMode(this, getSharedPreferences(APPEARANCE_PREFERENCES, MODE_PRIVATE)

@@ -11,7 +11,7 @@ import android.util.Log;
 public final class DaxServiceStarter extends BroadcastReceiver {
     public static void start(Context context) {
         if (Process.myUid() / 100000 != 0
-                || Application.getProcessName().endsWith(":daxservice")) return;
+                || !Application.getProcessName().equals(context.getPackageName())) return;
         try {
             context.startService(new Intent(context, DaxService.class));
         } catch (RuntimeException e) {
